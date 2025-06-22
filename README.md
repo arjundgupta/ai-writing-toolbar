@@ -1,357 +1,330 @@
-# WebPilot - AI Writing Assistant (Standalone Edition)
+# Web Content Parser & QA Assistant
 
-WebPilot is a browser extension that provides AI-powered writing assistance similar to GitHub Copilot, but for any website. It helps you write better content by providing real-time suggestions, improvements, and rewriting capabilities using ChatGPT.
+A powerful MVP API that extracts, processes, and semantically searches web content. This tool converts raw HTML into clean markdown, intelligently chunks the content, and uses semantic search to find the most relevant sections based on user queries.
 
-## ✨ Features
+## 🎯 Features
 
--   **🎯 Floating Toolbar**: Smart floating toolbar that appears above your cursor when you stop typing
--   **Real-time Suggestions**: Get AI-powered suggestions as you type in any text field
--   **Text Improvement**: Enhance clarity, grammar, and style with one click
--   **Text Rewriting**: Rewrite content in different ways while maintaining meaning
--   **Text Elaboration**: Expand and add detail to your writing
--   **Chat Interface**: Ask WebPilot for writing help and advice
--   **Context Awareness**: Understands the webpage context for better suggestions
--   **GPT Embeddings**: Uses GPT embeddings to analyze the current webpage and find relevant context
--   **Semantic Search**: Performs semantic search on the current page to find content related to your text
--   **Cross-Tab Context**: Include context from other browser tabs for enhanced AI assistance
--   **Universal Compatibility**: Works on any website with text inputs
--   **Keyboard Shortcuts**: Quick access with Ctrl/Cmd + Shift + P and floating toolbar shortcuts
--   **Modern UI**: Beautiful, responsive interface with dark mode support
--   **100% Client-Side**: All content processing happens directly in the browser, no external API needed
+-   **HTML Content Extraction**: Uses readability algorithms to extract main article content
+-   **Clean Markdown Conversion**: Converts HTML to well-formatted markdown
+-   **Intelligent Chunking**: Splits content by headings or fixed token sizes with overlap
+-   **Semantic Search**: Uses OpenAI embeddings to find most relevant content chunks
+-   **Fallback Mechanisms**: Graceful degradation when components fail
+-   **RESTful API**: Clean FastAPI interface with comprehensive error handling
 
-### 🎈 New: Floating Toolbar
+## 🚀 Quick Start
 
-The floating toolbar appears automatically when you stop typing, providing instant access to AI suggestions:
+### Prerequisites
 
--   **📝 Elaborate**: Expand and add more detail to your text
--   **✨ Improve**: Enhance clarity, grammar, and style
--   **🔄 Rewrite**: Rewrite content in different ways
--   **➕ Add Context**: Automatically include context from current page or other tabs
+-   Python 3.8+
+-   OpenAI API Key (for semantic search functionality)
 
-**Keyboard Shortcuts**:
+### Installation
 
--   `Ctrl/Cmd + Shift + E` - Elaborate text
--   `Ctrl/Cmd + Shift + I` - Improve text
--   `Ctrl/Cmd + Shift + R` - Rewrite text
+1. **Clone and navigate to the project:**
 
-**Smart Features**:
+    ```bash
+    cd vibetype-scrape-api
+    ```
 
--   Auto-positioning to avoid going off-screen
--   Mobile-responsive design
--   Excludes password fields and sensitive inputs
--   Smooth animations and hover effects
+2. **Install dependencies:**
 
-## 🚀 Installation
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-### Method 1: Load as Unpacked Extension (Development)
+3. **Set up environment variables:**
 
-1. **Download the extension files** to a folder on your computer
-2. **Open Chrome/Edge** and go to `chrome://extensions/`
-3. **Enable "Developer mode"** in the top right corner
-4. **Click "Load unpacked"** and select the folder containing the extension files
-5. **Pin the extension** to your toolbar for easy access
+    ```bash
+    # Copy the example environment file
+    copy .env.example .env
 
-### Method 2: Build from Source
+    # Edit .env and add your OpenAI API key
+    OPENAI_API_KEY=your_openai_api_key_here
+    ```
 
-1. **Clone or download** this repository
-2. **Open the folder** in your code editor
-3. **Load as unpacked extension** following Method 1 above
+4. **Run the API server:**
 
-## ⚙️ Setup
+    ```bash
+    python main.py
+    ```
 
-1. **Get an OpenAI API Key**:
+    The API will be available at `http://localhost:8000`
 
-    - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
-    - Create an account or sign in
-    - Generate a new API key (free tier available)
+### Quick Test
 
-2. **Configure the Extension**:
-    - Click the WebPilot extension icon in your browser
-    - Enter your OpenAI API key in the settings
-    - Click "Save API Key" and "Test Connection"
-    - Enable/disable features as needed
+Run the test script to see the API in action:
 
-## 🎯 How to Use
+```bash
+python test_api.py
+```
 
-### Basic Usage
+## 📖 API Documentation
 
-1. **Navigate to any website** with text input fields (Gmail, Notion, Twitter, etc.)
-2. **Click on a text field** (input, textarea, or contenteditable)
-3. **WebPilot sidebar appears** automatically on the right
-4. **Start typing** to get real-time suggestions
-5. **Use action buttons** to improve, rewrite, or elaborate your text
+### Main Endpoint: `/process`
 
-### Cross-Tab Context Feature
+**POST** `/process`
 
-WebPilot can include context from other browser tabs to provide more relevant suggestions:
+Processes HTML content and returns cleaned markdown with semantic search results.
 
-1. **Open the sidebar** by clicking on a text field
-2. **Expand "Additional Tab Context"** section (click the arrow)
-3. **Select a tab** from the dropdown list
-4. **Click "Load Context"** to include that tab's content
-5. **Get enhanced suggestions** that consider both current page and selected tab context
-6. **Clear context** when no longer needed
+#### Request Body
 
-### Enhanced Context Search
+```json
+{
+    "html": "<html>Raw HTML content from document.body.innerHTML</html>",
+    "query": "What are the main points about climate change?",
+    "chunk_size": 750, // Optional: target chunk size in tokens (100-2000)
+    "top_k": 3 // Optional: number of relevant chunks to return (1-10)
+}
+```
 
-The enhanced context feature now processes content directly in the browser:
+#### Response
 
-1. **Select a tab** from the dropdown
-2. **Enter a search query** like "key facts about [topic]"
-3. **Click "Enhanced Load" or "Search Content"**
-4. WebPilot will:
-    - Extract the main content from the page
-    - Split it into meaningful chunks
-    - Generate embeddings for each chunk using OpenAI's API
-    - Find the most relevant sections based on your query
-    - Show these sections for reference in your writing
+```json
+{
+    "success": true,
+    "title": "Article Title",
+    "clean_markdown": "# Clean markdown content...",
+    "chunks": [
+        {
+            "id": "1",
+            "title": "Section Title",
+            "content": "Chunk content...",
+            "token_count": 456,
+            "type": "heading_based"
+        }
+    ],
+    "most_relevant_chunks": [
+        {
+            "id": "1",
+            "title": "Most Relevant Section",
+            "content": "Relevant content...",
+            "similarity_score": 0.892,
+            "token_count": 456,
+            "type": "heading_based"
+        }
+    ],
+    "processing_time": 2.34,
+    "metadata": {
+        "total_chunks": 5,
+        "original_html_length": 15420,
+        "markdown_length": 3240,
+        "fallback_used": false,
+        "search_type": "semantic"
+    }
+}
+```
 
-**Use Cases:**
+### Additional Endpoints
 
--   Writing an email while referencing information from another tab
--   Creating content based on research from multiple sources
--   Summarizing information from different web pages
--   Cross-referencing data while writing reports
+#### Health Check: `/health`
 
-### GPT Embeddings Feature
+**GET** `/health`
 
-WebPilot uses GPT embeddings to analyze the current webpage and find content that's most relevant to your text:
+Returns API health status.
 
-1. **Analyze Current Page**: Click the "Analyze with GPT" button to scan the entire webpage
-2. **Semantic Search**: Enter a specific query to find the most relevant content on the page
-3. **Enhanced Text Actions**: When using Improve, Rewrite, or Elaborate, embeddings automatically find relevant page context
-4. **Smart Chat Assistance**: Chat with the AI about the page with full context from relevant sections
+#### Parse Only: `/parse-only`
 
-How it works:
+**POST** `/parse-only`
 
--   WebPilot parses the webpage HTML and extracts the main content
--   Content is divided into semantic chunks
--   GPT embeddings are created for each chunk
--   When you type or chat, semantic similarity search finds the most relevant content
--   The AI uses both your text and the relevant page content to provide better responses
+Extracts and cleans HTML without chunking or semantic search.
 
-Benefits:
+Request body: Raw HTML string
 
--   More precise context-aware responses
--   Better understanding of long, complex webpages
--   Improved rewriting and elaboration with page-specific knowledge
--   Chat about any part of the webpage with accurate context
+```json
+"<html>Raw HTML content</html>"
+```
 
-### Action Buttons
+## 🏗️ Architecture
 
--   **Improve**: Fixes grammar, improves clarity, and enhances style
--   **Rewrite**: Rewrites text using different words and structures
--   **Elaborate**: Expands text with more details and examples
--   **Chat**: Opens a chat interface for writing help
+### Core Components
 
-### Keyboard Shortcuts
+1. **HTMLParser** (`html_parser.py`)
 
--   **Ctrl/Cmd + Shift + P**: Toggle WebPilot sidebar
--   **Enter** in chat: Send message
--   **Shift + Enter** in chat: New line
+    - Uses `readability-lxml` for main content extraction
+    - Converts HTML to markdown with `html2text`
+    - Includes fallback cleaning for problematic HTML
 
-## 🔒 Privacy & Security
+2. **ContentChunker** (`content_chunker.py`)
 
--   **No External API Dependency**: All content processing happens directly in the browser
--   **Your Data Stays Local**: Page content is processed locally, with only embedding requests sent to OpenAI
--   **API Key Security**: Your OpenAI API key is stored securely in browser storage
--   **No Data Collection**: WebPilot doesn't collect or store your data
+    - Smart chunking by headings (##, ###, etc.)
+    - Fixed-size chunking with configurable overlap
+    - Token counting using `tiktoken`
 
-## 🧩 Technical Details
+3. **SemanticSearcher** (`semantic_search.py`)
 
-This extension integrates the following components directly in the browser:
+    - OpenAI embeddings for semantic similarity
+    - Batch processing for efficiency
+    - Keyword fallback when embeddings fail
 
-1. **HTML Parser**: Extracts and cleans webpage content
-2. **Content Chunker**: Splits content into semantic chunks
-3. **Semantic Search**: Uses OpenAI embeddings to find relevant content sections
+4. **FastAPI Server** (`main.py`)
+    - RESTful API with comprehensive error handling
+    - Request/response validation with Pydantic
+    - Async support for better performance
+
+### Processing Flow
+
+```
+Raw HTML → Content Extraction → Markdown Conversion → Chunking → Embedding → Semantic Search → Results
+```
 
 ## 🔧 Configuration
 
-### Settings
+### Environment Variables
 
--   **OpenAI API Key**: Required for generating embeddings and AI assistance
--   **Customize Behavior**: Change default settings in the sidebar
+-   `OPENAI_API_KEY`: Required for semantic search
+-   `EMBEDDING_MODEL`: Optional, defaults to `text-embedding-3-small`
+-   `API_HOST`: Optional, defaults to `0.0.0.0`
+-   `API_PORT`: Optional, defaults to `8000`
 
-## ⚠️ Known Limitations
+### Chunking Parameters
 
--   Large pages may take longer to process
--   Some websites with complex structures might not be parsed perfectly
--   API usage costs apply when using OpenAI services
+-   **Default chunk size**: 750 tokens
+-   **Default overlap**: 15%
+-   **Supported range**: 100-2000 tokens per chunk
 
-## 📜 License
+## 🧪 Testing
 
-MIT License
+### Automated Tests
 
-### Supported Text Fields
-
--   Regular input fields (`<input type="text">`)
--   Text areas (`<textarea>`)
--   Contenteditable elements (`[contenteditable]`)
--   Rich text editors (Quill, ProseMirror)
--   Gmail compose windows
--   Notion pages
--   Twitter/X compose boxes
--   And many more!
-
-## 🔧 Configuration
-
-### Settings
-
--   **Enable/Disable**: Turn WebPilot on or off globally
--   **Auto-suggestions**: Enable/disable real-time suggestions
--   **API Key Management**: Save and test your OpenAI API key
-
-### Customization
-
-The extension automatically adapts to:
-
--   **Dark/Light mode** based on system preferences
--   **Responsive design** for different screen sizes
--   **Website context** for better suggestions
--   **Cross-tab context** for enhanced AI assistance
-
-## 🛠️ Technical Details
-
-### Architecture
-
--   **Manifest V3**: Modern Chrome extension architecture
--   **Content Scripts**: Inject UI and handle text field detection
--   **Background Script**: Manages API calls and extension logic
--   **Popup Interface**: Settings and configuration management
--   **Cross-Tab Communication**: Secure tab context extraction
-
-### API Integration
-
--   **OpenAI GPT-3.5-turbo**: For all AI-powered features
--   **Context-Aware Prompts**: Includes webpage information for better suggestions
--   **Multi-Context Support**: Combines current page and additional tab context
--   **Error Handling**: Graceful fallbacks for API issues
-
-### Security
-
--   **Local Storage**: API keys stored securely in browser storage
--   **No Data Collection**: All processing happens locally
--   **Privacy-First**: No user data sent to external servers except OpenAI
--   **Tab Isolation**: Context extraction only when explicitly requested
-
-## 📁 File Structure
-
-```
-WebPilot/
-├── manifest.json          # Extension configuration
-├── content.js            # Content script for webpage integration
-├── background.js         # Background script for API handling
-├── popup.html           # Settings popup interface
-├── popup.js             # Popup functionality
-├── styles.css           # UI styling
-├── README.md            # This file
-└── icons/               # Extension icons (create this folder)
-    ├── icon16.png
-    ├── icon48.png
-    └── icon128.png
+```bash
+python test_api.py
 ```
 
-## 🎨 Creating Icons
+### Manual Testing with cURL
 
-You'll need to create icon files for the extension:
+1. **Process content:**
 
-1. **Create an `icons` folder** in the extension directory
-2. **Add icon files**:
-    - `icon16.png` (16x16 pixels)
-    - `icon48.png` (48x48 pixels)
-    - `icon128.png` (128x128 pixels)
+```bash
+curl -X POST "http://localhost:8000/process" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "html": "<html><body><h1>Test</h1><p>Content here</p></body></html>",
+       "query": "What is this about?"
+     }'
+```
 
-You can use any image editor or online icon generators to create these icons.
+2. **Health check:**
 
-## 🔍 Troubleshooting
+```bash
+curl "http://localhost:8000/health"
+```
+
+### Interactive API Documentation
+
+Visit `http://localhost:8000/docs` for Swagger UI documentation.
+
+## 🎯 Use Cases
+
+### Content Summarization
+
+```json
+{
+    "html": "...",
+    "query": "Summarize the main points"
+}
+```
+
+### Specific Information Extraction
+
+```json
+{
+    "html": "...",
+    "query": "What does this say about pricing?"
+}
+```
+
+### Content Filtering
+
+```json
+{
+    "html": "...",
+    "query": "Remove advertisements and promotional content"
+}
+```
+
+### Research Assistance
+
+```json
+{
+    "html": "...",
+    "query": "Find information about methodology and results"
+}
+```
+
+## 🚦 Error Handling
+
+The API includes comprehensive error handling:
+
+-   **400 Bad Request**: Invalid HTML or processing failures
+-   **500 Internal Server Error**: Unexpected server errors
+-   **Graceful Degradation**: Falls back to keyword search if semantic search fails
+
+## 📊 Performance Considerations
+
+-   **Chunk Size**: Larger chunks = fewer API calls but less granular search
+-   **Overlap**: More overlap = better context but increased processing time
+-   **Top-K**: More results = comprehensive but potentially noisy responses
+
+### Typical Performance
+
+-   **Small articles** (< 5KB): ~1-2 seconds
+-   **Medium articles** (5-20KB): ~2-5 seconds
+-   **Large articles** (> 20KB): ~5-10 seconds
+
+## 🔒 Security Notes
+
+-   Store OpenAI API keys securely
+-   Consider rate limiting for production use
+-   Validate and sanitize HTML input
+-   Monitor API usage and costs
+
+## 🛠️ Development
+
+### Adding New Features
+
+1. **Custom Chunking Strategies**: Modify `ContentChunker`
+2. **Alternative Embeddings**: Update `SemanticSearcher`
+3. **Content Filters**: Enhance `HTMLParser`
+4. **Output Formats**: Extend response models
+
+### Dependencies
+
+-   `fastapi`: Web framework
+-   `readability-lxml`: Content extraction
+-   `html2text`: HTML to markdown conversion
+-   `tiktoken`: Token counting
+-   `openai`: Embeddings API
+-   `scikit-learn`: Similarity calculations
+
+## 📈 Future Enhancements
+
+-   [ ] Support for multiple embedding models
+-   [ ] Content caching for repeated requests
+-   [ ] Batch processing endpoint
+-   [ ] Custom chunking strategies
+-   [ ] Integration with vector databases
+-   [ ] Multi-language support
+-   [ ] Content quality scoring
+
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Extension not working:**
+1. **"Import could not be resolved"**: Install requirements with `pip install -r requirements.txt`
+2. **OpenAI API errors**: Check API key and account credits
+3. **HTML parsing fails**: Some pages may require custom handling
+4. **Memory issues**: Reduce chunk size or implement pagination
 
--   Check if the extension is enabled in `chrome://extensions/`
--   Verify your OpenAI API key is valid
--   Test the API connection in settings
+### Getting Help
 
-**No suggestions appearing:**
-
--   Ensure you have a valid API key configured
--   Check if auto-suggestions are enabled
--   Try refreshing the webpage
-
-**Sidebar not appearing:**
-
--   Click on a text input field to trigger the sidebar
--   Use Ctrl/Cmd + Shift + P to manually toggle
--   Check if the extension is enabled
-
-**Tab context not loading:**
-
--   Ensure the target tab is accessible (not a chrome:// page)
--   Check if the tab has loaded completely
--   Try refreshing the target tab
-
-**API errors:**
-
--   Verify your API key is correct
--   Check your OpenAI account balance
--   Ensure you have internet connectivity
-
-### Debug Mode
-
-1. **Open Developer Tools** (F12)
-2. **Check Console** for error messages
-3. **Look for WebPilot-related logs**
-4. **Test API calls** in the Network tab
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-3. **Make your changes**
-4. **Test thoroughly**
-5. **Submit a pull request**
-
-### Development Setup
-
-1. **Clone the repository**
-2. **Load as unpacked extension**
-3. **Make changes to files**
-4. **Reload extension** in `chrome://extensions/`
-5. **Test on different websites**
+-   Check the `/health` endpoint for API status
+-   Review error messages in API responses
+-   Enable debug logging for detailed troubleshooting
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🙏 Acknowledgments
-
--   **OpenAI** for providing the GPT API
--   **Chrome Extensions** team for the excellent documentation
--   **GitHub Copilot** for inspiration
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. **Check the troubleshooting section** above
-2. **Review the console logs** for error messages
-3. **Test with a different website** to isolate issues
-4. **Create an issue** in the repository
-
-## 🔄 Updates
-
-To update the extension:
-
-1. **Download the latest version**
-2. **Replace the old files** with new ones
-3. **Reload the extension** in `chrome://extensions/`
-4. **Test functionality** on your favorite websites
+This project is provided as-is for educational and development purposes.
 
 ---
 
-**Happy Writing! ✍️**
-
-WebPilot makes writing better, one suggestion at a time.
+**Built with ❤️ using FastAPI, OpenAI, and modern Python tools.**
