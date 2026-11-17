@@ -14,7 +14,7 @@ A Chrome extension that brings an AI writing assistant to any text you highlight
 
 ## Tech
 
-chrome extension (manifest v3, shadow dom), python, fastapi, openai embeddings
+chrome extension (manifest v3, shadow dom), fastapi, openai embeddings
 
 ## Structure
 
