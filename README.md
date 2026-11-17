@@ -1,4 +1,4 @@
-# VibeType
+# AI Writing Toolbar
 
 A Chrome extension that brings an AI writing assistant to any text you highlight. Select text on any page to improve, rewrite, or expand it, or open a chat sidebar that can reference your open tabs.
 
